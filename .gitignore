@@ -211,3 +211,9 @@ __marimo__/
 /OmniLogic-CLI-v2.1/
 /omnilogic-v*/
 /OmniLogic-v*/
+
+# macOS
+.DS_Store
+
+# Claude AI assistant local configuration
+.claude/

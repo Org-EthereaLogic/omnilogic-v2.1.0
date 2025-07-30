@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      - omnilogic-vscode-extensions:/home/vscode/.vscode-server/extensions
+      - omnilogic-poetry-cache:/home/vscode/.cache/pypoetry
+    command: sleep infinity
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=omnilogic
+      - DATABASE_USER=omnilogic
+      - DATABASE_PASSWORD=omnilogic_dev_password
+      - PYTHONPATH=/workspace
+      - POETRY_VIRTUALENVS_IN_PROJECT=true
+      - POETRY_VIRTUALENVS_CREATE=true
+    networks:
+      - omnilogic-network
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - omnilogic-redis-data:/data
+    networks:
+      - omnilogic-network
+    command: redis-server --appendonly yes
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=omnilogic
+      - POSTGRES_USER=omnilogic
+      - POSTGRES_PASSWORD=omnilogic_dev_password
+    volumes:
+      - omnilogic-postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - omnilogic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omnilogic"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  omnilogic-network:
+    driver: bridge
+
+volumes:
+  omnilogic-vscode-extensions:
+  omnilogic-poetry-cache:
+  omnilogic-redis-data:
+  omnilogic-postgres-data:
