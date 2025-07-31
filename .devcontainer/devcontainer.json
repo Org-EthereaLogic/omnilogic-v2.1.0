@@ -1,2 +1,4 @@
-"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-"workspaceFolder": "/workspace",
+{
+  "name": "OmniLogic v2.1.0 - Minimal",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11"
+}
